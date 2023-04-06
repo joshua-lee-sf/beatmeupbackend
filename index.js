@@ -1,10 +1,14 @@
-const express = require('express')
-const cors = require('cors')
-const axios = require('axios')
-const dotenv = require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
 
 const app = express();
+
 app.use(cors());
+
+if (process.env.ENV_NODE === 'developnent'){
+  const dotenv = require('dotenv').config();
+}
 
 //Routes + Controllers
 app.get('/jamendosound', (req, res) => {
@@ -25,14 +29,42 @@ app.get('/jamendogetsound', (req, res) => {
 
 app.get('/youtubesound', (req, res) => {
   axios.get(`https://thibaultjanbeyer.github.io/YouTube-Free-Audio-Library-API/api.json`)
-  .then(response => res.send(response.data) )
+  .then(response => {
+    const redirectURL = response.headers.location;
+    return axios.get(redirectURL, {
+      headers: {
+        'Access-Control-Allow-Origin': "*",
+      },
+    });
+  })
+  .then(response => {
+    res.send(response.data);
+  })
 })
 
 app.get('/freesound', (req, res) => {
   axios.get(`https://freesound.org/apiv2/sounds/${req.query.id}?token=${process.env.FREESOUND_TOKEN}`)
-  .then(response => res.send(response.data) )
+    .then(response => res.send(response.data) )
+    .catch(response => console.log(response))
 })
 
 app.listen(5000, ()=> {
   console.log('listening on 5000')
 })
+
+// app.get('/youtubesound', (req, res) => {
+//   axios.get(`https://thibaultjanbeyer.github.io/YouTube-Free-Audio-Library-API/api.json`, {
+//     maxRedirects: 1,
+//   })
+//   .then(response => {
+//     const redirectURL = response.headers.location;
+//     return axios.get(redirectURL, {
+//       headers: {
+//         'Access-Control-Allow-Origin': "*",
+//       },
+//     });
+//   })
+//   .then(response => {
+//     res.send(response.data);
+//   })
+// })

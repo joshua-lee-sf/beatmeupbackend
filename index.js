@@ -29,7 +29,6 @@ app.get('/youtubesound', (req, res) => {
 })
 
 app.get('/youtubesounds', (req, res) => {
-  console.log(req.query.url)
   axios.get(decodeURIComponent(req.query.url), {
     responseType: "arraybuffer"
   })
